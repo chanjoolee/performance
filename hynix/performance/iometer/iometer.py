@@ -4,12 +4,14 @@ Created on 2016. 3. 15.
 @author: lee chanjoo
 '''
 
-import csv, itertools, cx_Oracle,datetime
+import csv, itertools, cx_Oracle,datetime, subprocess, os, shutil
 from _sqlite3 import Row
 from itertools import product
 matrix = []
 vToday = datetime.datetime.now().strftime("%Y%m%d")
 query = ''
+
+csvFiles = subprocess.check_output(["dir", "/b", "Z:\CsvDump\*.csv"], shell=True)
 files = ['D:/hynix/requirement/Performance/Performance_raw data/Iometer_raw data/Latency.csv'
          ,'D:/hynix/requirement/Performance/Performance_raw data/Iometer_raw data/Max Throughput.csv'
          ,'D:/hynix/requirement/Performance/Performance_raw data/Iometer_raw data/Mixed_Ran_RW.csv'
