@@ -24,7 +24,7 @@ def insertQuery(result):
 
     try:
         cur.prepare(insert)
-        cur.executemany(None, result)
+        #cur.executemany(None, result)
         con.commit()
         
     except:
@@ -277,7 +277,7 @@ if __name__ == '__main__':
         pwd = '//10.15.202.120/das_input/Solution/SSD_Performance'
 
         for path, dirs, files in os.walk(pwd):
-            dirs[:] = [dir for dir in dirs if dir != "Iometer" and dirs != "parsed" ]
+            dirs[:] = [dir for dir in dirs if dir != "Iometer" and dir not in("parsed") ]
             for file in files:
                 if os.path.basename(file) != 'readme.txt':
                     current_dir_path = os.path.join(path, file)             
@@ -331,7 +331,7 @@ if __name__ == '__main__':
                         parseXml(folder_name, tool, AS_SSDv18, Random4K64TTest_r_tag)
                         parseXml(folder_name, tool, AS_SSDv18, Random4K64TTest_w_tag)
                         parseAccTime(folder_name, tool, AS_SSDv18, acc_time_r_tag)
-                        parseAccTime(folder_name, tool, AS_SSDv16, acc_time_w_tag)
+                        parseAccTime(folder_name, tool, AS_SSDv18, acc_time_w_tag)
                         
                     elif file == 'PCMARK7.txt':
                         PCMARK7 = current_dir_path
