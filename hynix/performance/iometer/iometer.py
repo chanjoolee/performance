@@ -251,12 +251,12 @@ matrix = []
 vToday = datetime.datetime.now().strftime("%Y%m%d")
 query = ''
 path = "//10.15.202.120/das_input/Solution/SSD_Performance"
-dirs = os.listdir(path);
+dirsIometer = os.listdir(path);
 # folderHeaders = ['SYSTEM', 'OPERATING_SYSTEM', 'VENDOR', 'PRODUCT_NAME', 'NAND_TECH', 'CELL_TYPE','CONTROLLER', 'FORM_FACTOR', 'CAPACITY', 'FIRMWARE', 'SLC_BUFFER', 'MEASURE_DT']
 folderHeaders = ['MEASURE_DT','VENDOR','PRODUCT_NAME', 'CONTROLLER', 'NAND_TECH','CELL_TYPE', 'FORM_FACTOR','CAPACITY','FIRMWARE','SLC_BUFFER','SERIAL_NUMBER','TEST_COUNT']
 gFolderInfos = []
-files = []
-for subdir in dirs:
+filesIometer = []
+for subdir in dirsIometer:
     if subdir == 'parsed':
         continue
     pathIometer = path + '/' + subdir + '/Iometer'
@@ -267,10 +267,10 @@ for subdir in dirs:
     
     for file in dirIometer:
         fileObj = {"filePath":pathIometer + '/' + file,"folderName":subdir,"fileName":file}
-        files.append(fileObj)
+        filesIometer.append(fileObj)
 
 # 01.Max Throughput.csv
-for file in files:
+for file in filesIometer:
     f = open(file['filePath'], 'r')
      
 #      d_reader = csv.DictReader(f)
@@ -486,8 +486,8 @@ try:
     con.commit()
     # file move to parsed
     for folders in gFolderInfos:
-        src = path + '/' + folders['folderName']
-        dst = path + '/parsed/' + folders['folderName']
+        src = pwd + '/' + folders['folderName']
+        dst = pwd + '/parsed/' + folders['folderName']
         if os.path.exists(dst):   
             shutil.rmtree(dst)
         shutil.copytree(src,dst)
