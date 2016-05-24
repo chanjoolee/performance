@@ -203,25 +203,29 @@ def parseXlsx(folder_name, tool, file, pattern, race=file):
                     lists(folder_name, tool, data_src, _spec='Random', _field='Write 4KB (QD=32)', _measure=match.groupdict()['num'])                    
                
     elif race == CDM503:
-        for i in xrange(8,16):
-            match = pattern.search(sheet_ranges['A' + str(i)].value)
-            if match:
-                if i == 8:
-                    lists(folder_name, tool, data_src, _spec='Sequential', _field='Read (Q= 32,T= 1)', _measure=match.groupdict()['num'])
-                elif i == 9:
-                    lists(folder_name, tool, data_src, _spec='Sequential', _field='Write (Q= 32,T= 1)', _measure=match.groupdict()['num'])
-                elif i == 10:
-                    lists(folder_name, tool, data_src, _spec='Random', _field='Read 4KiB (Q= 32,T= 1)', _measure=match.groupdict()['num'])
-                elif i == 11:
-                    lists(folder_name, tool, data_src, _spec='Random', _field='Write 4KiB (Q= 32,T= 1)', _measure=match.groupdict()['num'])
-                elif i == 12:
-                    lists(folder_name, tool, data_src, _spec='Sequential', _field='REad (T= 1)', _measure=match.groupdict()['num'])
-                elif i == 13:
-                    lists(folder_name, tool, data_src, _spec='Sequential', _field='Write (T= 1)', _measure=match.groupdict()['num'])
-                elif i == 14:
-                    lists(folder_name, tool, data_src, _spec='Random', _field='Read 4KiB (Q= 1,T= 1)', _measure=match.groupdict()['num'])   
-                elif i == 15:
-                    lists(folder_name, tool, data_src, _spec='Random', _field='Write 4KiB (Q= 1,T= 1)', _measure=match.groupdict()['num'])   
+        iCDM503 = 0
+        for row in sheet_ranges.iter_rows():  
+            for cell in row:
+                if cell.value is not None:
+                    match =  pattern.search(cell.value)      
+                    if match:
+                        iCDM503 = iCDM503 + 1
+                        if iCDM503 == 1:
+                            lists(folder_name, tool, data_src, _spec='Sequential', _field='Read (Q= 32,T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 2:
+                            lists(folder_name, tool, data_src, _spec='Sequential', _field='Write (Q= 32,T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 3:
+                            lists(folder_name, tool, data_src, _spec='Random', _field='Read 4KiB (Q= 32,T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 4:
+                            lists(folder_name, tool, data_src, _spec='Random', _field='Write 4KiB (Q= 32,T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 5:
+                            lists(folder_name, tool, data_src, _spec='Sequential', _field='REad (T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 6:
+                            lists(folder_name, tool, data_src, _spec='Sequential', _field='Write (T= 1)', _measure=match.groupdict()['num'])
+                        elif iCDM503 == 7:
+                            lists(folder_name, tool, data_src, _spec='Random', _field='Read 4KiB (Q= 1,T= 1)', _measure=match.groupdict()['num'])   
+                        elif iCDM503 == 8:
+                            lists(folder_name, tool, data_src, _spec='Random', _field='Write 4KiB (Q= 1,T= 1)', _measure=match.groupdict()['num']) 
  
     elif race == PCMARK_VANTAGE:
         for i in pcmark_lists:
