@@ -342,13 +342,14 @@ try:
 #         query += " and tool = 'Iometer'"
         cur.execute(query)
          
-        query = "insert into PERFORMANCE_FOLDER(FOLDER_NAME, MEASURE_DT, VENDOR, PRODUCT_NAME, CONTROLLER, NAND_TECH, CELL_TYPE, FORM_FACTOR, CAPACITY, FIRMWARE, SLC_BUFFER, SERIAL_NUMBER, TEST_COUNT)"
+        query = "insert into PERFORMANCE_FOLDER(FOLDER_NAME, MEASURE_DT, VENDOR, PRODUCT_NAME, CONTROLLER, NAND_TECH, CELL_TYPE, FORM_FACTOR, CAPACITY, FIRMWARE, SLC_BUFFER, SERIAL_NUMBER, TEST_COUNT, CATEGORY)"
         query += " values("
         query += "'" + folders['folderName'] + "'"
         for head in folderHeaders:
             query += ",'" + folders['data'][head] + "'" 
             i = i + 1
-             
+        
+        query += ",'CSSD'"     
         query += ")"
         cur.execute(query)
     con.commit()   
