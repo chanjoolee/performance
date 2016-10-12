@@ -66,8 +66,8 @@ for file in filesIometer:
                 dictionary["meta"][head] = dicFolder[head]
              
             dictionary["keys"] = {}
-            dictionary["keys"]["folderName"] = file["folderName"] + "_" + dictionary["HostSystem"] + "_" + dictionary["Product"] + "_" + dictionary["Density"] + "_" + dictionary["Hardware"] + "_" + dictionary["Firmware"]
-            dictionary["keys"]["spec"] = dictionary["Pre-Cond"] + "_" + dictionary["Blocksize(KB)"] + "_" + dictionary["Rnd/Seq"] + "_" + dictionary["RW Ratio"]  + "_" + dictionary["IOPS"]
+            #dictionary["keys"]["folderName"] = file["folderName"] + "_" + dictionary["HostSystem"] + "_" + dictionary["Product"] + "_" + dictionary["Density"] + "_" + dictionary["Hardware"] + "_" + dictionary["Firmware"]
+            dictionary["keys"]["spec"] = dictionary["Pre-Cond"] + "_" + dictionary["Blocksize(KB)"] + "_" + dictionary["Rnd/Seq"] + "_" + dictionary["RW Ratio"]  #+ "_" + dictionary["IOPS"]
             
             dictionary["keys"]["QueueDepth"] = dictionary["QueueDepth"]
             del dictionary["QueueDepth"]
@@ -84,88 +84,45 @@ try:
     con_str = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
     con = cx_Oracle.connect(con_str)
     cur = con.cursor()
-      
-#     for folders in gFolderInfos:   
-#         i = 0
-#           
-#         query = "delete from PERFORMANCE_FOLDER where " 
-#         query += " FOLDER_NAME ='" + folders['folderName'] +"'"
-#         cur.execute(query)
-#           
-#         query = "delete from PERFORMANCE where " 
-#         query += " FOLDER_NAME ='" + folders['folderName'] +"'"
-# #         query += " and tool = 'Iometer'"
-#         cur.execute(query)
-#           
-#         query = "insert into PERFORMANCE_FOLDER(FOLDER_NAME, MEASURE_DT, VENDOR, PRODUCT_NAME, CONTROLLER, NAND_TECH, CELL_TYPE, FORM_FACTOR, CAPACITY, FIRMWARE, SLC_BUFFER, SERIAL_NUMBER, TEST_COUNT,CATEGORY )"
-#         query += " values("
-#         query += "'" + folders['folderName'] + "'"
-#         for head in folderHeaders:
-#             query += ",'" + folders['data'][head] + "'" 
-#             i = i + 1
-#         
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'" 
-#         query += ",'ESSD'"      
-#         query += ")"
-#         cur.execute(query)
-#     con.commit()   
-          
-          
+
+    for folders in gFolderInfos:   
+        i = 0
+         
+        query = "delete from PERFORMANCE_FOLDER where " 
+        query += " FOLDER_NAME ='" + folders['folderName'] +"'"
+        cur.execute(query)
+         
+        query = "delete from PERFORMANCE where " 
+        query += " FOLDER_NAME ='" + folders['folderName'] +"'"
+#         query += " and tool = 'Iometer'"
+        cur.execute(query)
+         
+        query = "insert into PERFORMANCE_FOLDER(FOLDER_NAME, MEASURE_DT, VENDOR, PRODUCT_NAME, CONTROLLER, NAND_TECH, CELL_TYPE, FORM_FACTOR, CAPACITY, FIRMWARE, SLC_BUFFER, SERIAL_NUMBER, TEST_COUNT, CATEGORY)"
+        query += " values("
+        query += "'" + folders['folderName'] + "'"
+        for head in folderHeaders:
+            query += ",'" + folders['data'][head] + "'" 
+            i = i + 1
+        
+        query += ",'ESSD'"     
+        query += ")"
+        cur.execute(query)
+    #con.commit()  
+     
     i = 0
     prekey = ""
     for m in matrix:
+        i = i+1
         print repr(i) + '(' + repr(len(matrix)) + ')'
         for mKey in m: 
             if type(m[mKey]) is dict:
                 continue
-#             folder name folder insert
-            if m['keys']['folderName'] != prekey :
-                query = "delete from PERFORMANCE_FOLDER where " 
-                query += " FOLDER_NAME ='" + m['keys']['folderName'] +"'"
-                cur.execute(query)
-                  
-                query = "delete from PERFORMANCE where " 
-                query += " FOLDER_NAME ='" + m['keys']['folderName'] +"'"
-        #         query += " and tool = 'Iometer'"
-                cur.execute(query)
-                  
-                query = "insert into PERFORMANCE_FOLDER(FOLDER_NAME, MEASURE_DT, VENDOR, PRODUCT_NAME, CONTROLLER, NAND_TECH, CELL_TYPE, FORM_FACTOR, CAPACITY, FIRMWARE, SLC_BUFFER, SERIAL_NUMBER, TEST_COUNT,CATEGORY )"
-                query += " values("
-                query += "'" + m['keys']['folderName'] + "'" # FOLDER_NAME
-                query += ",'" + m['meta']['folderName'] + "'" #MEASURE_DT
-                 
-                query += ",'" + m['HostSystem'] + "'"  #VENDOR
-                query += ",'" + m['Product'] + "'"  #PRODUCT_NAME
-                query += ",'ESSD'"  #CONTROLLER
-                query += ",'ESSD'"  #NAND_TECH
-                query += ",'" + m['Hardware'] + "'"  #CELL_TYPE
-                query += ",'ESSD'"  #FORM_FACTOR
-                query += ",'" + m['Density'] + "'"  #CAPACITY
-                query += ",'" + m['Firmware'] + "'"  #FIRMWARE
-                query += ",'ESSD'"  #SLC_BUFFER
-                query += ",'ESSD'"  #SERIAL_NUMBER
-                query += ",'ESSD'"  #TEST_COUNT
-                query += ",'ESSD'"  #CATEGORY
-                query += ")"
-                
-                cur.execute(query)
-                print m['keys']['folderName']
+#             
             query = " insert into PERFORMANCE(FOLDER_NAME, TOOL, DATA_SRC, SPEC, SPEC_LABEL, QUEUE_DEPTH, FIELD, MEASURE)"
-            query += " values('" + m["keys"]['folderName'] +"','" + m["meta"]['tool'] +"','" + m["meta"]['fileName'] +"', '" + m["keys"]['spec'] +"','', '" + m["keys"]["QueueDepth"] +"', '"+ mKey +"',  '" + m[mKey] + "'  )"
+            query += " values('" + m["meta"]['folderName'] +"','" + m["meta"]['tool'] +"','" + m["meta"]['fileName'] +"', '" + m["keys"]['spec'] +"','', '" + m["keys"]["QueueDepth"] +"', '"+ mKey +"',  '" + m[mKey] + "'  )"
             
             cur.execute(query)
-            prekey = m['keys']['folderName']
-        i = i+1
+        
     con.commit()
     #Iometer End
           
