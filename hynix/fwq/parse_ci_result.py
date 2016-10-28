@@ -7,6 +7,8 @@ import sys
 import subprocess
 import cx_Oracle
 import re
+import glob
+import shutil
 
 ################################################
 # Global Variable
@@ -23,10 +25,29 @@ def measureCodingRuleScore(fileList):
                '08_09','08_11','08_13','10_01','10_04','11_04','11_05','12_01'
                ,'12_03','12_04','13_02','13_03','13_04','15_01','15_02','15_04','15_05','15_06'
                ,'17_01','17_08','18_04','18_05','19_02','20_01','20_05']
+    #filterd directory
+    if not os.path.exists('filtered'):
+        os.makedirs('filtered')
+        
+    #delete filtered files    
+    #vFilterfiles = glob.glob('filtered/*')
+    #for f in vFilterfiles:
+    #    os.remove(f)
+       
+    if not os.path.exists('parsed'):
+        os.makedirs('parsed')
+        
     for csvFile in fileList :
         print csvFile
-                   
-        with open(csvFile, 'rb') as csvResult :
+        vDirectoryname = os.path.dirname(csvFile)     
+        vFilename = os.path.basename(csvFile)
+        if os.path.basename(vDirectoryname) == 'filtered':
+            continue 
+        if os.path.basename(vDirectoryname) == 'parsed':
+            continue 
+        
+        csvRows = []
+        with open(csvFile, 'rb') as csvResult:
             csvResult = csv.reader(csvResult)
             csvResult = filter(None, csvResult)
             
@@ -44,6 +65,7 @@ def measureCodingRuleScore(fileList):
                 if matchRemove :
                     continue
                 
+                csvRows.append(csvRow)
                 if csvRow[-1] == "Critical" :
                     criticalCnt+=1
                 elif csvRow[-1] == "Major" :
@@ -52,39 +74,57 @@ def measureCodingRuleScore(fileList):
                     minorCnt+=1
                 else :
                     otherCnt+=1
+        
+        with open('filtered/' + vFilename,'wb') as csvfile1:
+            spamwriter = csv.writer(csvfile1, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            spamwriter.writerows(csvRows)
+        
+        
+        if os.path.isfile('parsed/' + vFilename):
+            os.remove('parsed/' + vFilename);
+        
+        shutil.copyfile(csvFile, 'parsed/' + vFilename)
+        os.remove(csvFile)
+            
         print "Cricital CNT is " + str(criticalCnt)
-        
+         
         qualityProjectName = csvFile.split('\\')[-1].split('.')[0]
-        
+         
         # findLoc Val
         recentData = getRecentLOC(qualityProjectName)
-                
+                  
         # calc the Score
         if recentData == 0 :
             print "Please check the LOC value in CodeSonar."
         else :
             PPM = (float(criticalCnt) / float(recentData[-2])) * 1000000
-        
+          
             if PPM > 300.0 :
                 weeklyPoint = 0
             else :
                 weeklyPoint = 20 / 300 * (300 - PPM)
             insertRow = list(recentData[:3])
-            
+              
             insertRow.append(recentData[-2])
             insertRow.append(criticalCnt)
             insertRow.append(majorCnt)
             insertRow.append(minorCnt)
             insertRow.append(weeklyPoint)
-            
+              
             print insertRow        
-        
-
+          
+  
             insertData(insertRow)
-
+    
         
-        
-
+def moveFiles(path):     
+    if os.path.exists(path + '/parsed'):   
+        shutil.rmtree(path + '/parsed')
+    shutil.copytree(path + '/Output',path + '/parsed')    
+    vFilterfiles = glob.glob(path + '/Output/*')
+    for f in vFilterfiles:
+        os.remove(f)
+    
 ################################################           
 # 1.1. getRecentLOC()
 # Description :
@@ -93,8 +133,8 @@ def getRecentLOC(qualityProjectName):
     print "1.1. getRecentLOC()"
     
     try :
-        #connectInfo = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
-        connectInfo = 'swdashboarddev/swdashboarddev@166.125.112.110:1521/ALTDEV'
+        connectInfo = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
+        #connectInfo = 'swdashboarddev/swdashboarddev@166.125.112.110:1521/ALTDEV'
         connect = cx_Oracle.connect(connectInfo)
         cursor = connect.cursor()
         
@@ -163,8 +203,8 @@ def insertData(insertRow) :
     print "1.2. insertData()"
     
     try :
-#         connectInfo = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
-        connectInfo = 'swdashboarddev/swdashboarddev@166.125.112.110:1521/ALTDEV'
+        connectInfo = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
+        #connectInfo = 'swdashboarddev/swdashboarddev@166.125.112.110:1521/ALTDEV'
         connect = cx_Oracle.connect(connectInfo)
         cursor = connect.cursor()
         
@@ -241,8 +281,9 @@ if __name__ == "__main__":
     fileList =  fileList.split("\r\n")[:-1]
         
     print "2. Parse the CSV file Results"
+    
     measureCodingRuleScore(fileList)
     
-    
+    #moveFiles(path);
     
     
