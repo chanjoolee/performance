@@ -1,3 +1,4 @@
+# -*- coding: ms949 -*-
 '''
 Created on 2016. 3. 15.
 
@@ -35,16 +36,49 @@ for file in files:
     f.close()
     #matches = re.findall("(^(?P<key>[\w\s]+):(?P<value>.+)$)", filetext)
     matches = rx.findall(filetext)
+    mkey = {}
     for match in rx.finditer(filetext):
-        m = {}
         vKey = match.group("key").strip()
-        if(vKey != 'Tester'):
-            m['key'] = match.group("key").strip()
-            m['value'] = unicode(match.group("value").strip(),"cp949").encode("utf-8")
-            m['filePath'] = file['filePath']
-            m['fileName'] = file['filename']
-            m['yyyymm'] = filePathes[-3]
-            m['directory'] = filePathes[-2]
+        vValue = match.group("value").strip()        
+        if(vKey == 'Test Board'):
+            mkey['testBoard'] = vValue
+        
+        if(vKey == 'Sample'):
+            mkey['sample'] = vValue
+            
+        if(vKey == 'Firmware'):
+            mkey['firmware'] = vValue
+            
+        if(vKey == 'Sample Number'):
+            mkey['sampleNumber'] = vValue
+        
+    for match in rx.finditer(filetext):
+        #01. 변수정의
+        m = {}
+        m['keys'] = mkey
+        
+        vKey = match.group("key").strip()
+        vValue = match.group("value").strip()
+        
+        #02. 
+        iskey = False
+        for key in mkey.keys():
+            if(key == vKey) :
+                iskey = True
+                break            
+        if(iskey):
+            continue
+            
+        if(vKey == 'Tester'):
+            continue
+        
+        #03 
+        m['key'] = match.group("key").strip()
+        m['value'] = unicode(match.group("value").strip(),"cp949").encode("utf-8")
+        m['filePath'] = file['filePath']
+        m['fileName'] = file['filename']
+        m['yyyymm'] = filePathes[-3]
+        m['directory'] = filePathes[-2]
         matrix.append(m);
 
 
@@ -53,49 +87,54 @@ try:
     con_str = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
     con = cx_Oracle.connect(con_str)
     cur = con.cursor()
-    
     i = 0
     prekey = ""
     for m in matrix:
         i = i+1
-        for mKey in m: 
             
-            query = '''
-                declare 
-                    vCount number;
-                begin
-                    select count(*) into vCount from SILJANG_TEST 
+        query = '''
+            declare 
+                vCount number;
+            begin
+                select count(*) into vCount from SILJANG_TEST 
+                where YYYYMM = \'''' +  m['yyyymm'] + '''\'
+                and TEST_BOARD = \'''' +  m['keys']['sample'] + '''\'
+                and SAMPLE = \'''' +  m['keys']['sample'] + '''\' 
+                and FIRMWARE = \'''' +  m['keys']['firmware'] + '''\'
+                and SAMPLE_NUMBER = \'''' +  m['keys']['sampleNumber'] + '''\'
+                and FIELD = \'''' +  m['key'] + '''\';
+                
+                if vCount > 0 then
+                    update SILJANG_TEST set
+                        VALUE = \'''' + m['value'] + '''\'
+                        , mod_dt = sysdate
                     where YYYYMM = \'''' +  m['yyyymm'] + '''\'
-                    and DIRECTORY = \'''' +  m['directory'] + '''\'
-                    and FILE_NAME = \'''' +  m['fileName'] + '''\' 
+                    and TEST_BOARD = \'''' +  m['keys']['sample'] + '''\'
+                    and SAMPLE = \'''' +  m['keys']['sample'] + '''\' 
+                    and FIRMWARE = \'''' +  m['keys']['firmware'] + '''\'
+                    and SAMPLE_NUMBER = \'''' +  m['keys']['sampleNumber'] + '''\'
                     and FIELD = \'''' +  m['key'] + '''\';
-                    
-                    if vCount > 0 then
-                        update SILJANG_TEST set
-                            VALUE = \'''' + m['value'] + '''\'
-                            , mod_dt = sysdate
-                        where YYYYMM = \'''' +  m['yyyymm'] + '''\'
-                        and DIRECTORY = \'''' +  m['directory'] + '''\'
-                        and FILE_NAME = \'''' +  m['fileName'] + '''\' 
-                        and FIELD = \'''' +  m['key'] + '''\';
-                    else
-                        insert into SILJANG_TEST(YYYYMM, DIRECTORY, FILE_NAME, FIELD, VALUE, INS_DT, MOD_DT)
-                        values(
-                            \'''' + m['yyyymm'] + '''\',
-                            \'''' + m['directory'] + '''\',
-                            \'''' + m['fileName'] + '''\',
-                            \'''' + m['key'] + '''\',
-                            \'''' + m["value"] + '''\',
-                            sysdate,
-                            null                        
-                        );
-                    end if;
-                end;
+                else
+                    insert into SILJANG_TEST(YYYYMM, TEST_BOARD, SAMPLE, FIRMWARE, SAMPLE_NUMBER, FIELD, VALUE, DIRECTORY, FILE_NAME, INS_DT, MOD_DT)
+                    values(
+                        \'''' + m['yyyymm'] + '''\',
+                        \'''' + m['keys']['testBoard'] + '''\',
+                        \'''' + m['keys']['sample'] + '''\',
+                        \'''' + m['keys']['firmware'] + '''\',
+                        \'''' + m['keys']['sampleNumber'] + '''\',
+                        \'''' + m['key'] + '''\',
+                        \'''' + m["value"] + '''\',
+                        \'''' + m['directory'] + '''\',
+                        \'''' + m['fileName'] + '''\',
+                        sysdate,
+                        null                        
+                    );
+                end if;
+            end;        
+        '''
             
-            '''
-            
-            print query
-            cur.execute(query)
+        print query
+        cur.execute(query)
     con.commit()
       
 except cx_Oracle.DatabaseError ,ex:
