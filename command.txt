@@ -18,7 +18,7 @@
 				- pass: 1111
 			
 			- ubuntu_for_hadoop
-				- full name: ubuntu_for_hadoop
+				- full name: ubuntu_for_hadoop_02_17
 				- user name: hadoop
 				- pass: 1111
 				
@@ -31,15 +31,41 @@
 				- jdk
 					- $ sudo apt-get install openjdk-8-jdk
 				
-				
-				- hadoop
+				- ftp
+					sudo apt-get install vsftpd
+				- hadoop 설치
 					$ cd /usr/local
 					$ sudo wget http://apache.tt.co.kr/hadoop/common/hadoop-3.0.0-alpha2/hadoop-3.0.0-alpha2.tar.gz 
 					$ sudo tar xzf hadoop-3.0.0-alpha2.tar.gz 
 					$ sudo mv hadoop-3.0.0-alpha2 /home/hadoop/hadoop-3.0.0-alpha2
 					$ sudo chown -R hadoop:hadoop /home/hadoop/hadoop-3.0.0-alpha2
+					
+				- java home 찾기
+					1. $ whereis java
+						java: /usr/bin/java /etc/java /usr/share/java
+					2. $ ls -l /usr/bin/java
+						lrwxrwxrwx 1 root root 22 2009-01-15 18:34 /usr/bin/java -> /etc/alternatives/java
+					3. $ ls -l /etc/alternatives/java
+						lrwxrwxrwx 1 root root 31 2009-01-15 18:34 /etc/alternatives/java -> /usr/local/jre1.6.0_07/bin/java
+						나의 경우: /usr/lib/jvm/java-8-openjdk-i386/jre/bin/java
+						
+					4. JAVA_HOME 설정
+						- echo JAVA_HOME=/usr/lib/jvm/java-8-openjdk-i386		
+				- hadoop ex
+					- ex1
+						mkdir input
+						cp etc/hadoop/*.xml input
+						bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.0.0-alpha2.jar grep input output 'dfs[a-z.]+'
+						cat output/*
+					
+					- ex2
+						rm -rf input
+						rm -rf output
+						mkdir input
+						cp *.txt input
+						bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.0.0-alpha2.jar wordcount input output
+						cat output/*
 				
-			
 			- vi
 				- copy and paste
 					1. v
@@ -145,17 +171,7 @@
 				:bprevious - 버퍼에 있는 이전 파일로 이동 ( :bp 도 가능)
 				:ball - 버퍼 목록에 있는 파일들이 가로로 분할된 창에 열림
 			- find : find . -name 'search'
-			- java home 찾기
-				1. $ whereis java
-					java: /usr/bin/java /etc/java /usr/share/java
-				2. $ ls -l /usr/bin/java
-					lrwxrwxrwx 1 root root 22 2009-01-15 18:34 /usr/bin/java -> /etc/alternatives/java
-				3. $ ls -l /etc/alternatives/java
-					lrwxrwxrwx 1 root root 31 2009-01-15 18:34 /etc/alternatives/java -> /usr/local/jre1.6.0_07/bin/java
-					나의 경우: /usr/lib/jvm/java-8-openjdk-i386/jre/bin/java
-					
-				4. JAVA_HOME 설정
-					- echo JAVA_HOME=/usr/lib/jvm/java-8-openjdk-i386
+			
 					
 					
 					

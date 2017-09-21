@@ -11,8 +11,12 @@ from _sqlite3 import Row
 from itertools import product
 from telnetlib import theNULL
 from test.test_datetime import DSTEND
+import subprocess
 
 #Iometer start
+subprocess.call(r'net use z: /del', shell=True)
+subprocess.call(r'net use z: \\10.15.202.120\das_input /user:hynixad\probe test')
+
 matrix = []
 vToday = datetime.datetime.now().strftime("%Y%m%d")
 query = ''
@@ -81,7 +85,7 @@ for file in filesIometer:
 try:
      
     vProduct = '' 
-    con_str = 'swdashboard/swdashboard@166.125.19.98:1521/APS'
+    con_str = 'swdashboard/swdashboard@166.125.19.99:1521/APS'
     con = cx_Oracle.connect(con_str)
     cur = con.cursor()
 
